@@ -1,2 +1,5 @@
 bin/
 obj/
+# DLLs do FusionCore, interop gerado e saída do build (recriados por build/build.sh)
+.fusioncore/
+build/*.log

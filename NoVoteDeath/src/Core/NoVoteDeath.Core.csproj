@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <!-- net6.0 = original; net10.0 = runtime do FusionCore -->
+    <TargetFrameworks>net6.0;net10.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 </Project>

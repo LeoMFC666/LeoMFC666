@@ -1,19 +1,50 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Versões iguais às de mods públicos que compilam com AmongUs.GameLibs 2026.9.29 (ApeMV/AmongUsRevamped). Pacotes vêm de nuget.bepinex.dev (ver NuGet.config). -->
+  <!--
+    Alvo: FusionCore (Android) 0.045 — https://github.com/All-Of-Us-Mods/FusionCore
+    O FusionCore NÃO usa o BepInEx de PC: ele embarca o próprio fork "BepInEx Fusion"
+    (fusionApp/src/main/assets/BepInEx-arm64.zip) e roda em .NET 10 (README: "FusionCore uses .NET 10.0 and MonoMod reorganized").
+    Versões conferidas nas DLLs desse zip:
+      BepInEx.Core / BepInEx.Unity.IL2CPP  6.0.0-fusion.621   (BepInEx.Unity.IL2CPP e Il2CppInterop.Runtime são net10.0)
+      Il2CppInterop.*                      1.5.2-ci.star.27
+      0Harmony (HarmonyX)                  2.16.0
+    Por isso o plugin é compilado contra essas DLLs (build/fetch-fusioncore.sh) e contra interop
+    gerado pelo MESMO Il2CppInterop 1.5.2 a partir do AmongUs.GameLibs.Android (build/gen-interop.sh).
+    Antes (v1.1.0): BepInEx 6.0.0-be.735 de PC, Il2CppInterop 1.4.6, HarmonyX 2.10.2, net6.0.
+  -->
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
     <AssemblyName>NoVoteDeath</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.2.0</Version>
     <ImplicitUsings>disable</ImplicitUsings>
+    <!-- As DLLs do jogo/BepInEx já existem no aparelho: nada além de NoVoteDeath.dll vai para a saída. -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <FusionCoreDir Condition="'$(FusionCoreDir)' == ''">$(MSBuildThisFileDirectory)../../.fusioncore</FusionCoreDir>
+    <FusionCoreBepInEx>$(FusionCoreDir)/BepInEx/core</FusionCoreBepInEx>
+    <FusionCoreInterop>$(FusionCoreDir)/interop</FusionCoreInterop>
   </PropertyGroup>
 
+  <!-- BepInEx Fusion (o que o FusionCore carrega no Android) -->
   <ItemGroup>
-    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.735" ExcludeAssets="runtime;native" />
-    <PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" ExcludeAssets="runtime" />
-    <!-- Referenciado só para checar erros de Android (recomendação do guia do Starlight). Ajuste a versão ao Among Us atual. -->
-    <PackageReference Include="AmongUs.GameLibs.Android" Version="2026.9.29" PrivateAssets="all" />
+    <Reference Include="$(FusionCoreBepInEx)/BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(FusionCoreBepInEx)/BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(FusionCoreBepInEx)/BepInEx.Unity.Common.dll" Private="false" />
+    <Reference Include="$(FusionCoreBepInEx)/0Harmony.dll" Private="false" />
+    <Reference Include="$(FusionCoreBepInEx)/Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(FusionCoreBepInEx)/Il2CppInterop.Common.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- Interop do Among Us Android (AmongUs.GameLibs.Android 2026.9.29) gerado com o Il2CppInterop do FusionCore -->
+  <ItemGroup>
+    <Reference Include="$(FusionCoreInterop)/Assembly-CSharp.dll" Private="false" />
+    <Reference Include="$(FusionCoreInterop)/Hazel.dll" Private="false" />
+    <Reference Include="$(FusionCoreInterop)/Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="$(FusionCoreInterop)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(FusionCoreInterop)/Il2CppSystem.dll" Private="false" />
+    <Reference Include="$(FusionCoreInterop)/UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(FusionCoreInterop)/Unity.TextMeshPro.dll" Private="false" />
   </ItemGroup>
 
   <ItemGroup>

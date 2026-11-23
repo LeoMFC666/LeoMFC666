@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Ferramenta de build: gera os assemblies de interop do Among Us com o MESMO Il2CppInterop
+       (1.5.2-ci.star.27) que o FusionCore 0.045 embarca em BepInEx-arm64.zip (BepInEx 6.0.0-fusion.621).
+       Faz o mesmo que BepInEx.Unity.IL2CPP.Il2CppInteropManager.RunIl2CppInteropGenerator faz no aparelho. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <FusionCore>$(MSBuildThisFileDirectory)../../.fusioncore/BepInEx/core</FusionCore>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(FusionCore)/Il2CppInterop.Generator.dll" />
+    <Reference Include="$(FusionCore)/Il2CppInterop.Common.dll" />
+    <Reference Include="$(FusionCore)/AsmResolver.dll" />
+    <Reference Include="$(FusionCore)/AsmResolver.DotNet.dll" />
+    <Reference Include="$(FusionCore)/AsmResolver.PE.dll" />
+    <Reference Include="$(FusionCore)/AsmResolver.PE.File.dll" />
+    <Reference Include="$(FusionCore)/Mono.Cecil.dll" />
+    <Reference Include="$(FusionCore)/Microsoft.Extensions.Logging.Abstractions.dll" />
+    <Reference Include="$(FusionCore)/Microsoft.Extensions.Logging.dll" />
+    <Reference Include="$(FusionCore)/Microsoft.Extensions.Options.dll" />
+    <Reference Include="$(FusionCore)/Microsoft.Extensions.Primitives.dll" />
+    <Reference Include="$(FusionCore)/Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+    <Reference Include="$(FusionCore)/Microsoft.Extensions.DependencyInjection.dll" />
+    <Reference Include="$(FusionCore)/StableNameDotNet.dll" />
+  </ItemGroup>
+</Project>

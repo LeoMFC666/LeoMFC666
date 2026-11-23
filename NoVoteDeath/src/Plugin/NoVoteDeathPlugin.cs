@@ -11,7 +11,7 @@ namespace NoVoteDeath
         public const string Id = "dev.novotedeath.mod";
         public const string Name = "NO VOTE = DEATH";
         public const string Description = "Vote ou seja eliminado!";
-        public const string Version = "1.0.0";
+        public const string Version = "1.2.0";
 
         // Configurações (arquivo de config do BepInEx; só o ANFITRIÃO precisa delas, pois só ele decide).
         public static ConfigEntry<bool> Enabled;

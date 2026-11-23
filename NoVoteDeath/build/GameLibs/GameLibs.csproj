@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Só para baixar (restore) os pacotes de entrada do gerador de interop. Não compila nada. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <GamelibsVersion>2026.9.29</GamelibsVersion>
+    <!-- Versão do Unity do Among Us (AmongUs.GameLibs.Android.props: UnityVersion="2022.3.62") -->
+    <UnityVersion>2022.3.62</UnityVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AmongUs.GameLibs.Android" Version="$(GamelibsVersion)" ExcludeAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="UnityEngine.Modules" Version="$(UnityVersion)" ExcludeAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
+  <Target Name="PrintPaths">
+    <Message Importance="high" Text="GAMELIBS=$(PkgAmongUs_GameLibs_Android)" />
+    <Message Importance="high" Text="UNITYLIBS=$(PkgUnityEngine_Modules)" />
+  </Target>
+</Project>

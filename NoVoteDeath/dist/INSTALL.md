@@ -1,18 +1,30 @@
-# Instalação e submissão (Starlight / Android)
+# Instalação — FusionCore (Android)
 
-> A `NoVoteDeath.dll` só existe depois de compilar (veja README). Esta pasta `dist/` é onde ela deve ficar.
+NO VOTE = DEATH v1.2.0 · plugin BepInEx · compilado para o **BepInEx Fusion 6.0.0-fusion.621** que o FusionCore 0.045 traz.
 
-## O que se sabe (guia oficial: allofus.dev/guides/starlight-dev-guide)
-- Starlight roda **plugins BepInEx** como DLL .NET 6+ (AnyCPU).
-- O Starlight **público não carrega mods não aprovados**.
-- O guia **não descreve manifesto nem formato de pacote**. Não foi inventado nenhum aqui.
+## O que é confirmado (fontes)
+- FusionCore é "só um carregador de mods": não tem loja; você coloca as DLLs nos seus próprios arquivos
+  (mantenedor, [issue #30](https://github.com/All-Of-Us-Mods/FusionCore/issues/30)).
+- Não precisa editar manifesto nem APK do jogo: "FusionCore scans installed apps for IL2CPP unity games"
+  ([README](https://github.com/All-Of-Us-Mods/FusionCore)). Android 7.0+ (testado pelo autor só no Android 11+).
+- Pasta do BepInEx, no código do FusionCore (`BootstrapActivity.prepareConfig` → `Utilities.getExternalFusionCoreDirectory`):
+  `/storage/emulated/0/FusionCore/<pacote do jogo>/BepInEx`. Plugins ficam em `BepInEx/plugins` e configs em
+  `BepInEx/config` (`BepInEx.Paths` do BepInEx Fusion).
+- O pacote do Among Us Android é `com.innersloth.spacemafia`.
+- Não existe manifesto/zip de mod no FusionCore: é só a DLL. Nada foi inventado aqui.
 
-## Para testar no seu celular
-1. Entre no Discord do All Of Us (AOU) e peça entrada no time de **Beta Testers** (builds que aceitam mods não aprovados).
-2. Pergunte lá como carregar uma DLL local/qual formato de pacote usar.
-3. Instale o Starlight de Beta, coloque `NoVoteDeath.dll` conforme instruído e (opcional) `config/dev.novotedeath.mod.cfg`.
-4. O **anfitrião** deve ter o mod. Use tempo de votação > 0 na sala.
+## Passos
+1. Instale o Among Us da Play Store e o APK do FusionCore ([Releases](https://github.com/All-Of-Us-Mods/FusionCore/releases)).
+2. Abra o FusionCore, escolha **Among Us** e inicie uma vez (ele extrai o BepInEx, gera o interop e cria as pastas). Feche o jogo.
+3. Copie `NoVoteDeath.dll` para:
+   `/storage/emulated/0/FusionCore/com.innersloth.spacemafia/BepInEx/plugins/`
+4. (Opcional) Copie `dev.novotedeath.mod.cfg` para:
+   `/storage/emulated/0/FusionCore/com.innersloth.spacemafia/BepInEx/config/`
+   (sem ele, o arquivo é criado com os valores padrão na primeira execução).
+5. Abra o Among Us pelo FusionCore. No log do BepInEx deve aparecer `NO VOTE = DEATH v1.2.0 carregado.`
+6. O **anfitrião** precisa ter o mod. Use tempo de votação > 0 na sala.
 
-## Para publicar
-1. Envie a build à equipe AOU para aprovação (Discord).
-2. Informe: nome "NO VOTE = DEATH", descrição "Vote ou seja eliminado!", versão do GameLibs usada (2026.9.29) e que é host-autoritativo.
+## Se não carregar
+- Logs/crash: o FusionCore salva crash logs na pasta `FusionCore` (release 0.0.2); o log do BepInEx fica em `BepInEx/LogOutput.log`.
+- Versão do jogo diferente de 2026.9.29 → recompile (ver README, "Limitações").
+- Android 16: issue aberta [#24](https://github.com/All-Of-Us-Mods/FusionCore/issues/24) — o jogo fecha mesmo sem mods.
