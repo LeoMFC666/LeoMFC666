@@ -1,0 +1,50 @@
+name: NoVoteDeath build
+on:
+  push:
+    paths: ['NoVoteDeath/**', '.github/workflows/novotedeath.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    working-directory: NoVoteDeath
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+      # Qualquer etapa que falhar interrompe o job (sem continue-on-error): nada é publicado.
+      - name: Restaurar dependencias
+        run: |
+          dotnet restore tests/NoVoteDeath.Tests
+          dotnet restore src/Plugin
+      - name: Testes
+        run: |
+          mkdir -p ../out
+          set -o pipefail
+          dotnet test tests/NoVoteDeath.Tests -c Release --no-restore --logger "console;verbosity=normal" | tee ../out/test-report.txt
+      - name: Compilar plugin (AmongUs.GameLibs.Android 2026.9.29)
+        run: |
+          set -o pipefail
+          dotnet build src/Plugin -c Release --no-restore -o ../out/bin | tee ../out/build.log
+      - name: Verificar que a DLL e real
+        run: |
+          test -s ../out/bin/NoVoteDeath.dll
+          size=$(stat -c%s ../out/bin/NoVoteDeath.dll); echo "NoVoteDeath.dll = $size bytes"
+          [ "$size" -gt 5000 ]
+      - name: Montar pacote final
+        run: |
+          mkdir -p ../pkg
+          cp ../out/bin/NoVoteDeath.dll ../pkg/
+          cp config/dev.novotedeath.mod.cfg README.md dist/INSTALL.md ../out/test-report.txt ../pkg/
+          (cd .. && zip -r pkg/NoVoteDeath-source.zip NoVoteDeath -x 'NoVoteDeath/**/bin/*' 'NoVoteDeath/**/obj/*')
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NoVoteDeath-release
+          path: pkg/
+          if-no-files-found: error

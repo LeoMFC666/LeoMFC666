@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Versões iguais às de mods públicos que compilam com AmongUs.GameLibs 2026.9.29 (ApeMV/AmongUsRevamped). Pacotes vêm de nuget.bepinex.dev (ver NuGet.config). -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>NoVoteDeath</AssemblyName>
+    <Version>1.0.0</Version>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.735" ExcludeAssets="runtime;native" />
+    <PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- Referenciado só para checar erros de Android (recomendação do guia do Starlight). Ajuste a versão ao Among Us atual. -->
+    <PackageReference Include="AmongUs.GameLibs.Android" Version="2026.9.29" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Core\VoteEvaluator.cs" Link="Core\VoteEvaluator.cs" />
+    <Compile Include="..\Core\MeetingSession.cs" Link="Core\MeetingSession.cs" />
+    <Compile Include="..\Core\TimerTextBuilder.cs" Link="Core\TimerTextBuilder.cs" />
+  </ItemGroup>
+</Project>
