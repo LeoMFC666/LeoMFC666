@@ -16,7 +16,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
     <AssemblyName>NoVoteDeath</AssemblyName>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <ImplicitUsings>disable</ImplicitUsings>
     <!-- As DLLs do jogo/BepInEx já existem no aparelho: nada além de NoVoteDeath.dll vai para a saída. -->
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
@@ -51,5 +51,6 @@
     <Compile Include="..\Core\VoteEvaluator.cs" Link="Core\VoteEvaluator.cs" />
     <Compile Include="..\Core\MeetingSession.cs" Link="Core\MeetingSession.cs" />
     <Compile Include="..\Core\TimerTextBuilder.cs" Link="Core\TimerTextBuilder.cs" />
+    <Compile Include="..\Core\MonoModHome.cs" Link="Core\MonoModHome.cs" />
   </ItemGroup>
 </Project>

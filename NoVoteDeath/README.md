@@ -2,7 +2,38 @@
 
 Mod BepInEx IL2CPP para Among Us, alvo: **FusionCore (Android)** — também segue sendo um plugin BepInEx comum.
 
-## Estado real desta versão (v1.2.0 — compatibilidade FusionCore)
+## v1.2.1 — correção do Harmony/MonoMod no Android (FusionCore)
+
+**Erro corrigido** (LogOutput.log): `System.UnauthorizedAccessException: Access to the path '/data/.cache' is denied`
+em `MonoMod.Core.Platforms.Systems.AndroidSystem..ctor()` ← `HarmonyLib.Public.Patching.NativeDetourMethodPatcher.TryResolve()`.
+
+**Causa (conferida nas DLLs do FusionCore 0.045, não suposta):**
+1. HarmonyX 2.16: `NativeDetourMethodPatcher.TryResolve` é um resolvedor global e lê `PlatformTriple.Current` em **todo** `Harmony.Patch`,
+   o que cria a plataforma do MonoMod.Core 1.4.0-alpha → `AndroidSystem..ctor()`.
+2. Esse construtor faz `Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(LocalApplicationData), ".cache"))` e guarda a
+   pasta como `HelperDropPath`, onde depois grava `mm-exhelper.so.XXXXXX` e faz `dlopen` dela.
+3. No `System.Private.CoreLib` que o FusionCore traz, `LocalApplicationData` = `$HOME`. O processo do jogo não tem `HOME`, então o runtime usa
+   `getpwuid()` → no Android, `/data` → `/data/.cache` → acesso negado.
+4. Esse CoreLib **memoriza** o valor em `Environment.s_specialFolders` na 1ª leitura. Por isso só trocar `HOME` **não** resolveria se algo
+   já tivesse lido a pasta (ex.: uma tentativa anterior que falhou).
+
+**Suporte do Harmony/MonoMod a esse ambiente:** sim. O MonoMod.Core do FusionCore tem `AndroidSystem`, `Arm64Arch`, `Core100Runtime` (.NET 10)
+e `exhelper_android_arm64.so`; o `AndroidSystem` não anuncia `MayUseNativeJitHooks`, então usa o hook de JIT gerenciado (o
+`GetNativeJitHookConfig` não implementado nunca é chamado). Os detours de métodos IL2CPP usam o `NativeDetourProvider` do BepInEx Fusion
+(`libfusion`), não o MonoMod. O único bloqueio era a pasta de cache.
+
+**Correção** (`src/Plugin/MonoModAndroidFix.cs` + lógica testável em `src/Core/MonoModHome.cs`), só em volta do `Harmony.CreateAndPatchAll`:
+- escolhe uma pasta **privada e interna** do app, gravável e sem `noexec` (exigência do `dlopen`), nesta ordem:
+  `<app_fusion_runtime>/monomod-home` (ao lado do runtime .NET que o FusionCore extraiu), `/data/user/0/<pacote>/cache/monomod-home`,
+  `/data/data/<pacote>/cache/monomod-home`, `$TMPDIR/monomod-home` — testando de verdade (cria a pasta e grava um arquivo);
+- **nunca** toca em `/`, `/data`, `/system`, `/proc`… nem no armazenamento compartilhado (`/storage`, `/sdcard`: `noexec`) — esses são rejeitados sem acesso ao disco;
+- redireciona `LocalApplicationData` para lá: `HOME`, `XDG_DATA_HOME` (runtimes .NET padrão) **e** a entrada memorizada em `Environment.s_specialFolders`;
+- o MonoMod inicializa (uma vez por processo) e fixa `HelperDropPath` nessa pasta; depois tudo é **restaurado** ao valor anterior;
+- se a pasta atual já serve (PC/Linux normal), não muda nada. Lógica do jogo e patches: **sem alteração**.
+
+Também nesta versão (mudança sua, preservada): `TempoDeVotacao` padrão = **25** s.
+
+## Estado da v1.2.0 — compatibilidade FusionCore
 
 | Item | Estado |
 |---|---|
@@ -66,6 +97,12 @@ contra a pilha do FusionCore. Não usamos MonoMod diretamente (o README do Fusio
 - iOS: não suportado (FusionCore é só Android). PC: esta DLL é net10.0 para o BepInEx Fusion; o BepInEx de PC usa .NET 6 — para PC compile a v1.1.0.
 
 ## Testes (`tests/`)
+`NoVoteDeath.FusionCompatTests/MonoModAndroidTests` (v1.2.1): instancia o **`AndroidSystem` real** do MonoMod do FusionCore (com um shim
+mínimo `__errno`/`sysconf` bionic→glibc compilado no teste) numa pasta existente e sem permissão → reproduz o erro do log; com
+`MonoModAndroidFix` do plugin compilado → inicializa, `HelperDropPath` = pasta interna gravável, e HOME/XDG/LocalApplicationData voltam ao original;
+HarmonyX 2.16 do FusionCore aplica um Postfix de verdade no .NET 10. `NoVoteDeath.Tests/MonoModHomeTests`: escolha da pasta, locais proibidos,
+pacote do `/proc/self/cmdline`, sonda real, e o redirecionamento do valor memorizado.
+
 `NoVoteDeath.FusionCompatTests`: alvos do Harmony existem (1 sobrecarga), parâmetros dos Postfix batem com o jogo, constantes, enums,
 versões referenciadas = versões do FusionCore, net10.0/AnyCPU/IL-only, `[BepInPlugin]`, sem MonoMod direto. (Rodado contra a DLL v1.1.0, reprova: HarmonyX 2.10.2 e net6.0.)
 
